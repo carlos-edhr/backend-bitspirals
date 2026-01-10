@@ -1,0 +1,7 @@
+.env 
+
+
+posts/migrations
+posts/__pycache__ 
+
+backend/__pycache__
