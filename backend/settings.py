@@ -199,4 +199,4 @@ SIMPLE_JWT = {
 
 
 # WhiteNoise compression for production
-# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
