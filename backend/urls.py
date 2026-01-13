@@ -4,6 +4,12 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from django.http import HttpResponse
+
+
+def health_check(request):
+    return HttpResponse("OK", status=200)
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -16,4 +22,5 @@ urlpatterns = [
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     # Opcional: Rutas para la interfaz de navegación de la API de DRF
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
+    path("health/", health_check, name="health_check"),
 ]

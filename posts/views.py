@@ -10,12 +10,12 @@ class PostViewSet(viewsets.ModelViewSet):
 
     serializer_class = PostSerializer
 
-    # Esta función determina qué notas se pueden ver (Solo las del usuario logueado)
+    # Esta función determina qué notas se pueden ver (Solo las del user logueado)
     def get_queryset(self):
-        # Filtra el queryset para mostrar SÓLO las notas del usuario actualmente autenticado
-        return Post.objects.filter(usuario=self.request.user)
+        # Filtra el queryset para mostrar SÓLO las notas del user actualmente autenticado
+        return Post.objects.filter(user=self.request.user)
 
     # Sobreescribe el método para crear el objeto.
-    # Esto inyecta el usuario actual en el campo 'usuario' del modelo automáticamente.
+    # Esto inyecta el user actual en el campo 'user' del modelo automáticamente.
     def perform_create(self, serializer):
-        serializer.save(usuario=self.request.user)
+        serializer.save(user=self.request.user)

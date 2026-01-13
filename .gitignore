@@ -5,3 +5,19 @@ posts/migrations
 posts/__pycache__ 
 
 backend/__pycache__
+
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.DS_Store
+
+redeploy.sh
+
+fix-permissions.sh
+
+.dockerignore
+
+Dockerfile

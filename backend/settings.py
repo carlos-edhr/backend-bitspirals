@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from datetime import timedelta
+import os
 from pathlib import Path
 from decouple import config
 
@@ -21,13 +22,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-^^$7v!1yyxe6buf4hx97rm(%ll%z9=^ebo=xapgbere_@x_cyv"
+
+SECRET_KEY = config("SECRET_KEY", default="secret-key-for-development-only")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+DEBUG = config("DEBUG", default=False, cast=bool)
 
 
 # Application definition
@@ -43,12 +42,14 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt",  #  JWT auth
+    "whitenoise",
     # local apps
     "posts",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -85,13 +86,69 @@ WSGI_APPLICATION = "backend.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("DB_NAME"),  # Ej: 'notas_db'
-        "USER": config("DB_USER"),  # Ej: 'django_user'
-        "PASSWORD": config("DB_PASSWORD"),  # Contraseña segura
-        "HOST": config("DB_HOST"),
+        "NAME": config("DB_NAME", default=""),  # Default empty
+        "USER": config("DB_USER", default=""),
+        "PASSWORD": config("DB_PASSWORD", default=""),
+        "HOST": config("DB_HOST", default=""),
         "PORT": "5432",
     }
 }
+
+# For development, allow localhost
+# if DEBUG:
+#     ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
+# else:
+#     ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="").split(",")
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="").split(",")
+
+# Get the service URL from environment or construct it
+CLOUD_RUN_SERVICE_URL = os.environ.get("CLOUD_RUN_SERVICE_URL", "")
+
+# CSRF settings for Cloud Run
+CSRF_TRUSTED_ORIGINS = []
+
+
+# If we have a Cloud Run URL, add it to CSRF trusted origins
+if CLOUD_RUN_SERVICE_URL:
+    CSRF_TRUSTED_ORIGINS.append(CLOUD_RUN_SERVICE_URL)
+
+
+# Also add the domain without https:// if needed
+if not DEBUG:
+    # In production, trust the Cloud Run domain
+    if "ALLOWED_HOSTS" in locals() and ALLOWED_HOSTS:
+        for host in ALLOWED_HOSTS:
+            if host and host != "*":
+                CSRF_TRUSTED_ORIGINS.append(f"https://{host}")
+
+# Security settings for HTTPS/SSL
+if not DEBUG:
+    # Ensure cookies are only sent over HTTPS
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+
+    # For Cloud Run behind a load balancer
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+
+    # Additional security headers
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
+
+# CORS settings (update these too)
+CORS_ALLOWED_ORIGINS = [
+    "https://127.0.0.1:8000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+# frontend domain, add  here
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "")
+if FRONTEND_URL:
+    CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
+
+CORS_ALLOW_CREDENTIALS = True
 
 
 # Password validation
@@ -129,6 +186,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"  # Add this line
+MEDIA_URL = "media/"
+
+MEDIA_ROOT = BASE_DIR / "media"
 
 
 SIMPLE_JWT = {
@@ -136,8 +197,6 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
-# server/core/settings.py
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # O el puerto que use Vite
-    "http://127.0.0.1:5173",
-]
+
+# WhiteNoise compression for production
+# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
