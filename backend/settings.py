@@ -153,7 +153,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # frontend domain, add  here
-FRONTEND_URL = os.environ.get("FRONTEND_URL", "")
+FRONTEND_URL = os.environ.get("https://frontend-bitspirals.pages.dev", "")
 if FRONTEND_URL:
     CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
 
