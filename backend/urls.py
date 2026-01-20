@@ -5,6 +5,8 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from django.http import HttpResponse
+from django.conf.urls.static import static
+from backend import settings
 
 
 def health_check(request):
@@ -14,8 +16,10 @@ def health_check(request):
 urlpatterns = [
     path("admin/", admin.site.urls),
     # 1. Rutas de la API de Notas
-    path("api/", include("posts.urls")),
-    # 2. Rutas de Autenticación JWT (para React/Postman)
+    # path("api/", include("posts.urls")),
+    # 2. Account API Routes
+    path("api/account/", include("account.urls")),
+    # 3. Rutas de Autenticación JWT (para React/Postman)
     # /api/token/ -> Obtener par de tokens (acceso y refresco)
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     # /api/token/refresh/ -> Refrescar el token de acceso
@@ -24,3 +28,8 @@ urlpatterns = [
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
     path("health/", health_check, name="health_check"),
 ]
+
+
+# Add this to serve media files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

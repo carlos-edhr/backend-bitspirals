@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",  #  JWT auth
     "whitenoise",
     # local apps
-    "posts",
+    # "posts",
+    "account",
 ]
 
 # STORAGES = {
@@ -147,11 +148,12 @@ if not DEBUG:
 
 # CORS settings (update these too)
 CORS_ALLOWED_ORIGINS = [
-    # "https://127.0.0.1:8000",
-    # "http://localhost:5173",
-    # "http://127.0.0.1:5173",
-    # "http://localhost:3000",
-    # "http://127.0.0.1:3000",
+    # change on DEV ENV
+    "https://127.0.0.1:8000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
     "https://bitspirals.com",
     "https://www.bitspirals.com",
 ]
@@ -200,7 +202,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"  # Add this line
-MEDIA_URL = "media/"
+MEDIA_URL = "/media/"
 
 MEDIA_ROOT = BASE_DIR / "media"
 
